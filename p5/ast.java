@@ -1519,8 +1519,9 @@ class AssignNode extends ExpNode {
     }
 
     /**
-     * nameAnalysis Given a symbol table symTab, perform name analysis on this
-     * node's two children
+     * nameAnalysis
+     * Given a symbol table symTab, perform name analysis on this node's
+     * two children
      */
     public void nameAnalysis(SymTable symTab) {
         myLhs.nameAnalysis(symTab);
@@ -1528,15 +1529,68 @@ class AssignNode extends ExpNode {
     }
 
     public void unparse(PrintWriter p, int indent) {
-        if (indent != -1)
-            p.print("(");
+        if (indent != -1)  p.print("(");
         myLhs.unparse(p, 0);
         p.print(" = ");
         myExp.unparse(p, 0);
-        if (indent != -1)
-            p.print(")");
+        if (indent != -1)  p.print(")");
     }
+    public Type typeCheck() {
+        Type leftType = myLhs.typeCheck();
+        Type rightType = myExp.typeCheck();
+        if (leftType.isErrorType() || rightType.isErrorType()) {
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+        int lineNum = leftType.lineNum;
+        int charNum = leftType.charNum;
 
+        if (!leftType.equals(rightType)) {
+            ErrMsg.fatal(lineNum, charNum, "Type mismatch");
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+
+        if (leftType.isFnType()) {
+            ErrMsg.fatal(lineNum, charNum, "Function assignment");
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+        if (leftType.isFnType()) {
+            ErrMsg.fatal(lineNum, charNum, "Function assignment");
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+
+        if (leftType.isStructDefType()) {
+            ErrMsg.fatal(lineNum, charNum, "Struct name assignment");
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+
+        if (leftType.isStructType()) {
+            ErrMsg.fatal(lineNum, charNum, "Struct variable assignment");
+            return new ErrorType(leftType.lineNum, leftType.charNum);
+        }
+        
+
+
+        if (rightType.isFnType()) {
+            ErrMsg.fatal(lineNum, charNum, "Function assignment");
+            return new ErrorType(rightType.lineNum, rightType.charNum);
+        }
+        if (rightType.isFnType()) {
+            ErrMsg.fatal(lineNum, charNum, "Function assignment");
+            return new ErrorType(rightType.lineNum, rightType.charNum);
+        }
+
+        if (rightType.isStructDefType()) {
+            ErrMsg.fatal(lineNum, charNum, "Struct name assignment");
+            return new ErrorType(rightType.lineNum, rightType.charNum);
+        }
+
+        if (rightType.isStructType()) {
+            ErrMsg.fatal(lineNum, charNum, "Struct variable assignment");
+            return new ErrorType(rightType.lineNum, rightType.charNum);
+        }
+
+        return leftType;
+    }
     // 2 kids
     private ExpNode myLhs;
     private ExpNode myExp;
